@@ -2,7 +2,9 @@ package com.example.demo.validation;
 
 import java.text.MessageFormat;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.util.StringUtils;
 
 import com.example.demo.annotation.ValidPasswordSize;
@@ -12,12 +14,15 @@ import jakarta.validation.ConstraintValidatorContext;
 
 public class PasswordSizeValidator implements ConstraintValidator<ValidPasswordSize, String>{
 
+	@Autowired
+	private MessageSource messageSource;
+	
 	@Value("${password.max}")
 	private int maxLength;
 	
 	@Value("${password.min}")
 	private int minLength;
-	
+		
 	
 	@Override
 	public void initialize(ValidPasswordSize constraintAnnotation) {
@@ -37,19 +42,19 @@ public class PasswordSizeValidator implements ConstraintValidator<ValidPasswordS
 	public boolean isValid(String value, ConstraintValidatorContext context) {
 		
 		// メッセージを動的なlengthの上限、下限で再構築する
-		String messageTemplate = "{0}は{1}文字以上{2}文字以内で入力してください";
+		String messageTemplate = messageSource.getMessage("errors.password.length", null, null);
 		String message = MessageFormat.format(messageTemplate, new Object[] {"パスワード", this.minLength, this.maxLength});
 	
 		
 		if(!StringUtils.hasLength(value)) {
-			// バリデーションエラーの場合は既定のテンプレートでのメッセージ構築を無効化して、メッセージ付きでConstraitViolationを追加
+			// バリデーションエラーの場合は既定のテンプレートでのメッセージ構築を無効化して、動的メッセージ付きでConstraitViolationを追加
 			context.disableDefaultConstraintViolation();
 			context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
 		}
 		
 		if (value.length() < this.minLength || value.length() > this.maxLength) {
-			// バリデーションエラー場合は既定のテンプレートでのメッセージ構築を無効化して、メッセージ付きでConstraitViolationを追加
+			// バリデーションエラー場合は既定のテンプレートでのメッセージ構築を無効化して、動的メッセージ付きでConstraitViolationを追加
 			context.disableDefaultConstraintViolation();
 			context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
