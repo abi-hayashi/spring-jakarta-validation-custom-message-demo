@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: demo
+  messages:
+    basename: messages
+    encoding: UTF-8
+password:
+  min: ${PASSWORD_MIN:5}
+  max: ${PASSWORD_MAX:20}
